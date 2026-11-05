@@ -1,1 +1,81 @@
-{% extends 'base.html' %}{% block content %}<div class='row'><h1>Encrypted vault</h1><form method='post' action='{{ url_for("lock_vault") }}'><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class='secondary'>Lock vault</button></form></div><section class='panel'><h2>Add credential</h2><form method='post' action='{{ url_for("add_entry") }}'><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><label>Title <input name='title' required maxlength='120'></label><label>Username <input name='username' maxlength='200'></label><label>Password <input type='password' name='password' required autocomplete='new-password'></label><label>URL <input name='url' maxlength='500'></label><label>Notes <textarea name='notes' maxlength='2000'></textarea></label><button>Encrypt and save</button></form></section><section class='panel'><h2>Saved entries ({{ entries|length }})</h2>{% for e in entries %}<article class='entry'><h3>{{ e.title }}</h3><p>{{ e.username }} · {{ e.url }}</p><details><summary>Reveal details</summary><p>Password: <code>{{ e.password }}</code></p><p>{{ e.notes }}</p></details><form method='post' action='{{ url_for("delete_entry",item_id=e.id) }}'><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class='danger'>Delete</button></form></article>{% else %}<p>No entries yet.</p>{% endfor %}</section>{% endblock %}
+{% extends 'base.html' %}
+{% block content %}
+<div class='row'>
+ <h1>Encrypted vault</h1>
+ <form method='post' action='{{ url_for("lock_vault") }}'>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <button class='secondary'>Lock vault</button>
+ </form>
+</div>
+<section class='panel'>
+ <h2>Add credential</h2>
+ <form method='post' action='{{ url_for("add_entry") }}'>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <label>Title <input name='title' required maxlength='120'></label>
+  <label>Username <input name='username' maxlength='200'></label>
+  <label>Password <input type='password' name='password' required autocomplete='new-password'></label>
+  <label>URL <input name='url' maxlength='500'></label>
+  <label>Notes <textarea name='notes' maxlength='2000'></textarea></label>
+  <button>Encrypt and save</button>
+ </form>
+</section>
+<section class='panel'>
+ <h2>Saved entries ({{ entries|length }})</h2>
+ {% for e in entries %}
+ <article class='entry' data-entry-id='{{ e.id }}'>
+  <h3>{{ e.title }}</h3>
+  <p>{{ e.username }} · {{ e.url }}</p>
+  <button type='button' class='reveal-button' data-entry-id='{{ e.id }}'>Reveal password and notes</button>
+  <div class='revealed-secret' hidden aria-live='polite'></div>
+  <form method='post' action='{{ url_for("delete_entry",item_id=e.id) }}'>
+   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+   <button class='danger'>Delete</button>
+  </form>
+ </article>
+ {% else %}
+ <p>No entries yet.</p>
+ {% endfor %}
+</section>
+<script>
+(() => {
+ const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
+ document.querySelectorAll('.reveal-button').forEach(button => {
+  button.addEventListener('click', async () => {
+   const id = button.dataset.entryId;
+   const target = document.querySelector('.entry[data-entry-id="' + id + '"] .revealed-secret');
+   button.disabled = true;
+   button.textContent = 'Loading…';
+   try {
+    const body = new URLSearchParams({csrf_token: csrf});
+    const response = await fetch('/vault/reveal/' + encodeURIComponent(id), {
+     method: 'POST',
+     credentials: 'same-origin',
+     headers: {'Content-Type':'application/x-www-form-urlencoded'},
+     body: body.toString()
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || 'Unable to reveal entry.');
+    const passwordLine = document.createElement('p');
+    passwordLine.textContent = 'Password: ' + data.password;
+    const notesLine = document.createElement('p');
+    notesLine.textContent = 'Notes: ' + data.notes;
+    target.replaceChildren(passwordLine, notesLine);
+    target.hidden = false;
+    button.textContent = 'Hide password and notes';
+    button.onclick = () => {
+     target.replaceChildren();
+     target.hidden = true;
+     button.textContent = 'Reveal password and notes';
+     button.onclick = null;
+    };
+   } catch (error) {
+    button.textContent = 'Reveal failed';
+    window.alert(error.message);
+   } finally {
+    button.disabled = false;
+   }
+  }, {once:true});
+ });
+})();
+</script>
+{% endblock %}
