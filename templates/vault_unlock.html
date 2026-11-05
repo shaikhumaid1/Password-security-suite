@@ -1,0 +1,1 @@
+{% extends 'base.html' %}{% block content %}<section class='panel narrow'><h1>Unlock vault</h1><form method='post'>{{ csrf_token() }}<label>Master password <input type='password' name='master_password' autocomplete='current-password' required></label><button>Unlock</button></form></section>{% endblock %}
