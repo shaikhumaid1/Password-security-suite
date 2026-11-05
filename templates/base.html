@@ -11,7 +11,10 @@
     <header class="topbar">
       <a class="brand" href="/">🔐 Password Security Suite</a>
       {% if session.get('authenticated') %}
-      <form method="post" action="{{ url_for('logout') }}"><button class="ghost" type="submit">Lock / Logout</button></form>
+      <nav class="top-actions">
+        <a class="nav-link" href="{{ url_for('security_settings') }}">Security settings</a>
+        <form method="post" action="{{ url_for('logout') }}"><button class="ghost" type="submit">Lock / Logout</button></form>
+      </nav>
       {% endif %}
     </header>
     {% with messages = get_flashed_messages(with_categories=true) %}
