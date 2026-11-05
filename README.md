@@ -16,6 +16,28 @@ A local-first Flask learning project for password generation, password-strength 
 - SQLite persistence, HTTP security headers, no-store responses, and a 15-minute permanent-session lifetime.
 - Local-only server binding at `127.0.0.1:5000`.
 
+## Presentation demo (shareable, no credentials)
+
+A static interactive preview is available at `demo/index.html`. It is designed for presentations and does not authenticate users, create accounts, validate MFA, send data to a server, or persist entered values. Its sample password generator is illustrative only and does not use cryptographically secure randomness. Do not enter real passwords.
+
+### Publish the static demo with GitHub Pages
+
+1. Open the repository on GitHub.
+2. Go to **Settings → Pages**.
+3. Under **Build and deployment**, choose **Deploy from a branch**.
+4. Select branch **main** and folder **/ (root)**, then save.
+5. Once GitHub Pages finishes publishing, the demo URL will be:
+   `https://shaikhumaid1.github.io/Password-security-suite/demo/`
+
+If the page is not available immediately, wait for the Pages deployment to finish and check the **Actions** tab.
+
+### Two ways to present
+
+- **In-person real application:** run `python app.py` on your laptop and open `http://127.0.0.1:5000`. This uses your local SQLite account and MFA configuration.
+- **Shareable online preview:** share the GitHub Pages demo URL. It is a frontend-only simulation and is not connected to your local database or authentication.
+
+Do not deploy the current Flask authentication application publicly. It is a local educational app, not production-hardened. For remote live demonstrations, use a separate staging environment with dummy data, HTTPS, proper CSRF protection, rate limiting, secure cookie settings, and a security review.
+
 ## Requirements
 
 - Python 3.10+
