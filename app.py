@@ -322,15 +322,57 @@ def check():
                   "warning": warning, "suggestions": suggestions}
     )
 
+@app.route("/security", methods=["GET", "POST"])
+@login_required
+def security_settings():
+    row = account()
+    if request.method == "POST":
+        action = request.form.get("action", "")
+        current_password = request.form.get("current_password", "")
+        token = request.form.get("token", "").strip()
+        if not check_password_hash(row["password_hash"], current_password):
+            flash("Current master password is incorrect.", "error")
+            return redirect(url_for("security_settings"))
+        if not token or not pyotp.TOTP(row["totp_secret"]).verify(token, valid_window=1):
+            flash("Enter a valid current 6-digit authenticator code.", "error")
+            return redirect(url_for("security_settings"))
+
+        if action == "change_password":
+            new_password = request.form.get("new_password", "")
+            confirm = request.form.get("confirm_password", "")
+            if len(new_password) < 12:
+                flash("New master password must contain at least 12 characters.", "error")
+            elif new_password != confirm:
+                flash("New passwords do not match.", "error")
+            elif check_password_hash(row["password_hash"], new_password):
+                flash("Choose a different master password.", "error")
+            else:
+                with db() as con:
+                    con.execute("UPDATE account SET password_hash=? WHERE id=1",
+                                (generate_password_hash(new_password, method="scrypt"),))
+                session.clear()
+                flash("Master password changed. Sign in again with your new password and MFA.", "success")
+                return redirect(url_for("login"))
+        elif action == "regenerate_recovery":
+            recovery = [secrets.token_urlsafe(9) for _ in range(8)]
+            hashes = [generate_password_hash(code) for code in recovery]
+            with db() as con:
+                con.execute("UPDATE account SET recovery_hashes=? WHERE id=1", (json.dumps(hashes),))
+            return render_template("recovery.html", recovery=recovery,
+                                   title="New recovery codes",
+                                   message="Your recovery codes have been replaced. All previously issued codes are now invalid. Save these codes securely.")
+        else:
+            flash("Unknown security settings action.", "error")
+    return render_template("security.html", username=row["username"],
+                           recovery_count=len(json.loads(row["recovery_hashes"] or "[]")))
+
+
 @app.route("/recovery-regenerate", methods=["POST"])
 @login_required
 def recovery_regenerate():
-    recovery = [secrets.token_urlsafe(9) for _ in range(8)]
-    hashes = [generate_password_hash(code) for code in recovery]
-    with db() as con:
-        con.execute("UPDATE account SET recovery_hashes=? WHERE id=1", (json.dumps(hashes),))
-    return render_template("recovery.html", recovery=recovery)
+    # Backwards-compatible endpoint: require re-authentication rather than
+    # allowing any authenticated session to silently replace recovery factors.
+    return redirect(url_for("security_settings"))
 
-if __name__ == "__main__":
-    # Bind only to loopback: this app is intended for this computer only.
-    app.run(host="127.0.0.1", port=5000, debug=False)
+
+
