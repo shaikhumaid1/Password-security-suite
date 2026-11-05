@@ -1,0 +1,57 @@
+{% extends "base.html" %}{% block title %}Security dashboard{% endblock %}
+{% block content %}
+<div class="welcome"><div><p class="eyebrow">SECURITY WORKSPACE</p><h1>Password Security Suite</h1><p class="muted">Welcome, {{ username }}. Generate strong credentials or analyse password strength.</p></div><span class="secure-pill">● MFA protected</span></div>
+<div class="grid">
+  <section class="panel">
+    <p class="eyebrow">01 / GENERATOR</p><h2>Advanced password generator</h2>
+    <form method="post" action="{{ url_for('generate') }}" class="stack">
+      <label>Password length <strong id="lengthValue">20</strong>
+        <input type="range" name="length" min="8" max="128" value="20" oninput="document.getElementById('lengthValue').textContent=this.value">
+      </label>
+      <div class="checks">
+        <label><input type="checkbox" name="lower" checked> Lowercase (a-z)</label>
+        <label><input type="checkbox" name="upper" checked> Uppercase (A-Z)</label>
+        <label><input type="checkbox" name="digits" checked> Numbers (0-9)</label>
+        <label><input type="checkbox" name="symbols" checked> Symbols (!@#...)</label>
+        <label><input type="checkbox" name="avoid_ambiguous" checked> Exclude ambiguous characters</label>
+      </div>
+      <button type="submit">Generate secure password</button>
+    </form>
+    {% if generated %}
+    <div class="result"><span class="eyebrow">GENERATED PASSWORD</span><code id="generatedPassword">{{ generated }}</code>
+      <button type="button" class="secondary" onclick="navigator.clipboard.writeText(document.getElementById('generatedPassword').textContent)">Copy password</button>
+      <p class="muted tiny">Generated using Python's cryptographically secure secrets module.</p>
+    </div>
+    {% endif %}
+  </section>
+  <section class="panel">
+    <p class="eyebrow">02 / ANALYSER</p><h2>Password strength checker</h2>
+    <p class="muted">Uses zxcvbn pattern analysis rather than only checking character classes.</p>
+    <form method="post" action="{{ url_for('check') }}" class="stack">
+      <label>Password to analyse<input type="password" name="password" required autocomplete="off" placeholder="Enter a password"></label>
+      <button type="submit">Analyse strength</button>
+    </form>
+    {% if analysis %}
+    <div class="result">
+      <div class="score-row"><strong>{{ analysis.label }}</strong><span class="score">Score {{ analysis.score }}/4</span></div>
+      <div class="meter"><span style="width:{{ (analysis.score + 1) * 20 }}%"></span></div>
+      <p><b>Estimated guesses:</b> {{ "{:,}".format(analysis.guesses) }}</p>
+      <p><b>Offline slow-hash estimate:</b> {{ analysis.crack }}</p>
+      {% if analysis.warning %}<p class="warning-text">{{ analysis.warning }}</p>{% endif %}
+      {% if analysis.suggestions %}<ul>{% for item in analysis.suggestions %}<li>{{ item }}</li>{% endfor %}</ul>{% endif %}
+    </div>
+    {% endif %}
+  </section>
+</div>
+<section class="panel security-note">
+  <h2>Security controls</h2>
+  <ul>
+    <li>Master password is stored as a salted scrypt hash, not plaintext.</li>
+    <li>Time-based one-time password (TOTP) MFA is required for sign-in.</li>
+    <li>Eight one-time recovery codes are generated during MFA setup.</li>
+    <li>Passwords entered into the checker are not stored or logged by this app.</li>
+    <li>The server binds to 127.0.0.1 and is intended for local use only.</li>
+  </ul>
+  <form method="post" action="{{ url_for('recovery_regenerate') }}"><button class="secondary" type="submit">Regenerate recovery codes</button></form>
+</section>
+{% endblock %}
