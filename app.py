@@ -37,7 +37,7 @@ app.config.update(
     PERMANENT_SESSION_LIFETIME=900,
 )
 
-AMBIGUOUS = "O0Il1|\x60'\\""
+AMBIGUOUS = "O0Il1|`'"
 SYMBOLS = "!@#$%^&*()-_=+[]{};:,.?/"
 
 def db():
