@@ -1,0 +1,10 @@
+{% extends "base.html" %}{% block title %}Recovery codes{% endblock %}
+{% block content %}
+<section class="panel narrow">
+  <p class="eyebrow">SAVE THESE NOW</p><h1>Your recovery codes</h1>
+  <p class="warning-text">Each code can be used once if you lose access to your authenticator. This page is shown only now. Store them somewhere secure and offline.</p>
+  <div class="codes">{% for code in recovery %}<code>{{ code }}</code>{% endfor %}</div>
+  <button type="button" onclick="navigator.clipboard.writeText({{ recovery|tojson }}.join('\\n'))">Copy recovery codes</button>
+  <a class="button-link" href="{{ url_for('login') }}">Continue to login</a>
+</section>
+{% endblock %}
