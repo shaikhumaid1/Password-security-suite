@@ -1,0 +1,21 @@
+{% extends "base.html" %}{% block title %}Reset local account{% endblock %}
+{% block content %}
+<section class="panel narrow">
+  <p class="eyebrow">LAST-RESORT ACCOUNT RECOVERY</p>
+  <h1>Delete and recreate account</h1>
+  <div class="notice warning">
+    <strong>Permanent action:</strong> This deletes the current local account credentials and MFA setup. You will lose access to the old account. You must create a new master password and enroll an authenticator again.
+  </div>
+  <p class="muted">Use this only if you have lost both your master password and every recovery code. This app currently stores account and MFA credentials locally; it does not store a recoverable password vault.</p>
+  <form method="post" class="stack">
+    <label>Confirm your current username
+      <input name="username" required autocomplete="username" value="{{ username }}">
+    </label>
+    <label>Type <code>DELETE MY LOCAL ACCOUNT</code> to confirm
+      <input name="confirmation" required autocomplete="off" placeholder="DELETE MY LOCAL ACCOUNT">
+    </label>
+    <button type="submit" class="danger">Delete account and start over</button>
+  </form>
+  <p class="muted tiny" style="text-align:center;margin-top:16px"><a href="{{ url_for('login') }}">Cancel and return to login</a></p>
+</section>
+{% endblock %}
