@@ -41,6 +41,21 @@ class VaultStore:
    except Exception as e: raise VaultError('Vault entry authentication failed.') from e
    d['id']=r['id']; out.append(d)
   return out
+ def list_entry_summaries(self):
+  self._check()
+  with self._connect() as c: rows=c.execute('SELECT id,nonce,ciphertext FROM entries ORDER BY updated_at DESC').fetchall()
+  out=[]
+  for r in rows:
+   try: d=json.loads(decrypt(self._key,r['nonce'],r['ciphertext'],r['id'].encode()))
+   except Exception as e: raise VaultError('Vault entry authentication failed.') from e
+   out.append({'id':r['id'],'title':d.get('title',''),'username':d.get('username',''),'url':d.get('url','')})
+  return out
+ def get_entry(self,i):
+  self._check()
+  with self._connect() as c: r=c.execute('SELECT id,nonce,ciphertext FROM entries WHERE id=?',(i,)).fetchone()
+  if r is None: raise VaultError('Vault entry not found.')
+  try: return json.loads(decrypt(self._key,r['nonce'],r['ciphertext'],r['id'].encode()))
+  except Exception as e: raise VaultError('Vault entry authentication failed.') from e
  def delete(self,i):
   self._check()
   with self._connect() as c: c.execute('DELETE FROM entries WHERE id=?',(i,))
