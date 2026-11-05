@@ -198,6 +198,46 @@ def login():
             flash("MFA verification failed. Enter your 6-digit code or a recovery code.", "error")
     return render_template("login.html")
 
+@app.route("/forgot-password", methods=["GET", "POST"])
+def forgot_password():
+    row = account()
+    if not row:
+        return redirect(url_for("setup"))
+    if request.method == "POST":
+        username = request.form.get("username", "").strip()
+        recovery_code = request.form.get("recovery_code", "").strip()
+        new_password = request.form.get("new_password", "")
+        confirm = request.form.get("confirm", "")
+        hashes = json.loads(row["recovery_hashes"] or "[]")
+        used_index = next(
+            (i for i, h in enumerate(hashes)
+             if recovery_code and check_password_hash(h, recovery_code)),
+            None,
+        )
+        if username != row["username"] or used_index is None:
+            flash("Username or recovery code is invalid.", "error")
+        elif len(new_password) < 12:
+            flash("Use at least 12 characters for the new master password.", "error")
+        elif new_password != confirm:
+            flash("The new passwords do not match.", "error")
+        else:
+            # A recovery code authorizes one password reset. Rotate the entire
+            # recovery-code set so previously issued codes cannot be reused.
+            new_recovery = [secrets.token_urlsafe(9) for _ in range(8)]
+            new_hashes = [generate_password_hash(code) for code in new_recovery]
+            with db() as con:
+                con.execute(
+                    "UPDATE account SET password_hash=?, recovery_hashes=? WHERE id=1",
+                    (generate_password_hash(new_password, method="scrypt"),
+                     json.dumps(new_hashes)),
+                )
+            session.clear()
+            return render_template("recovery.html", recovery=new_recovery,
+                                   title="New recovery codes",
+                                   message="Your master password was reset. Save these new recovery codes; all previous codes have been invalidated.")
+    return render_template("forgot_password.html")
+
+
 @app.route("/logout", methods=["POST"])
 def logout():
     session.clear()
