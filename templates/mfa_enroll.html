@@ -1,0 +1,13 @@
+{% extends "base.html" %}{% block title %}Set up MFA{% endblock %}
+{% block content %}
+<section class="panel narrow">
+  <p class="eyebrow">REQUIRED SECURITY STEP</p><h1>Connect your authenticator</h1>
+  <p>Scan this QR code with an authenticator app such as Google Authenticator, Microsoft Authenticator, or Aegis.</p>
+  <div class="qr"><img src="data:image/png;base64,{{ qr_data }}" alt="Authenticator setup QR code"></div>
+  <p class="muted tiny">Can't scan? Enter this secret manually:</p><code class="secret">{{ secret }}</code>
+  <form method="post" class="stack">
+    <label>Enter the current 6-digit code<input name="token" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" required></label>
+    <button type="submit">Verify and enable MFA</button>
+  </form>
+</section>
+{% endblock %}
