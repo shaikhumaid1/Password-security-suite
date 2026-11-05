@@ -1,5 +1,6 @@
 import base64
 import hashlib
+import hmac
 import io
 import json
 import os
@@ -236,6 +237,42 @@ def forgot_password():
                                    title="New recovery codes",
                                    message="Your master password was reset. Save these new recovery codes; all previous codes have been invalidated.")
     return render_template("forgot_password.html")
+
+
+@app.route("/reset-account", methods=["GET", "POST"])
+def reset_account():
+    """Destructive local recovery when both master password and recovery codes are lost."""
+    row = account()
+    if not row:
+        session.clear()
+        return redirect(url_for("setup"))
+
+    if request.method == "POST":
+        supplied_username = request.form.get("username", "").strip()
+        confirmation = request.form.get("confirmation", "").strip()
+        expected_phrase = "DELETE MY LOCAL ACCOUNT"
+
+        username_ok = hmac.compare_digest(
+            supplied_username.encode("utf-8"),
+            row["username"].encode("utf-8"),
+        )
+        phrase_ok = hmac.compare_digest(
+            confirmation.encode("utf-8"),
+            expected_phrase.encode("utf-8"),
+        )
+
+        if not (username_ok and phrase_ok):
+            flash("Confirmation did not match. No account data was changed.", "error")
+        else:
+            # This app currently stores only local account/MFA credentials.
+            # Removing the singleton account forces a completely fresh setup.
+            with db() as con:
+                con.execute("DELETE FROM account WHERE id=1")
+            session.clear()
+            flash("The local account was deleted. Create a new account and enroll MFA again.", "warning")
+            return redirect(url_for("setup"))
+
+    return render_template("reset_account.html", username=row["username"])
 
 
 @app.route("/logout", methods=["POST"])
