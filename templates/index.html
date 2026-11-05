@@ -52,6 +52,6 @@
     <li>Passwords entered into the checker are not stored or logged by this app.</li>
     <li>The server binds to 127.0.0.1 and is intended for local use only.</li>
   </ul>
-  <form method="post" action="{{ url_for('recovery_regenerate') }}"><button class="secondary" type="submit">Regenerate recovery codes</button></form>
+  <a class="button-link" href="{{ url_for('security_settings') }}">Manage security settings</a>
 </section>
 {% endblock %}
