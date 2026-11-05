@@ -1,7 +1,7 @@
 import os
 import time
 from pathlib import Path
-from flask import Flask,flash,redirect,render_template,request,session,url_for
+from flask import Flask,flash,jsonify,redirect,render_template,request,session,url_for
 from flask_wtf.csrf import CSRFProtect
 from pss.core.passwords import generate_password,generate_passphrase,analyze_password
 from pss.vault.store import VaultStore,VaultError
@@ -109,7 +109,7 @@ def vault_page():
  if not unlocked():
   return redirect(url_for('unlock_vault' if vault.exists() else 'setup_vault'))
  try:
-  return render_template('vault.html',entries=vault.list_entries())
+  return render_template('vault.html',entries=vault.list_entry_summaries())
  except VaultError as e:
   vault.lock()
   session.clear()
@@ -126,6 +126,16 @@ def add_entry():
  except Exception as e:
   flash(str(e),'error')
  return redirect(url_for('vault_page'))
+
+@app.post('/vault/reveal/<item_id>')
+def reveal_entry(item_id):
+ if not unlocked():
+  return jsonify({'error':'Vault is locked.'}),401
+ try:
+  entry=vault.get_entry(item_id)
+  return jsonify({'password':entry.get('password',''),'notes':entry.get('notes','')})
+ except VaultError as e:
+  return jsonify({'error':str(e)}),404
 
 @app.post('/vault/delete/<item_id>')
 def delete_entry(item_id):
