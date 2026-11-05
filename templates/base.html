@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Password Security Suite{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <a class="brand" href="/">🔐 Password Security Suite</a>
+      {% if session.get('authenticated') %}
+      <form method="post" action="{{ url_for('logout') }}"><button class="ghost" type="submit">Lock / Logout</button></form>
+      {% endif %}
+    </header>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}{% for category, message in messages %}
+        <div class="notice {{ category }}">{{ message }}</div>
+      {% endfor %}{% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+    <footer>Local-first • Passwords are processed in memory and are not saved by the checker or generator.</footer>
+  </main>
+</body>
+</html>
