@@ -1,0 +1,15 @@
+{% extends "base.html" %}{% block title %}Unlock{% endblock %}
+{% block content %}
+<section class="panel narrow">
+  <p class="eyebrow">LOCAL AUTHENTICATION</p><h1>Unlock your workspace</h1>
+  <form method="post" class="stack">
+    <label>Username<input name="username" required autocomplete="username"></label>
+    <label>Master password<input type="password" name="password" required autocomplete="current-password"></label>
+    <div class="divider">MULTI-FACTOR AUTHENTICATION</div>
+    <label>Authenticator code (6 digits)<input name="token" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code"></label>
+    <p class="muted tiny">If you cannot access your authenticator, leave this blank and enter one unused recovery code.</p>
+    <label>Recovery code<input name="recovery_code" autocomplete="off"></label>
+    <button type="submit">Verify and unlock</button>
+  </form>
+</section>
+{% endblock %}
