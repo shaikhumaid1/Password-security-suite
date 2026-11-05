@@ -1,0 +1,30 @@
+{% extends "base.html" %}{% block title %}Security settings{% endblock %}
+{% block content %}
+<section class="panel narrow">
+  <p class="eyebrow">ACCOUNT PROTECTION</p>
+  <h1>Security settings</h1>
+  <p class="muted">Signed in as <strong>{{ username }}</strong>. Changes to your credentials require your current master password and a fresh authenticator code.</p>
+  <div class="security-stat"><span>MFA status</span><strong class="secure-pill">● Enabled</strong></div>
+  <div class="security-stat"><span>Unused recovery codes</span><strong>{{ recovery_count }} / 8</strong></div>
+
+  <div class="divider">CHANGE MASTER PASSWORD</div>
+  <form method="post" class="stack">
+    <input type="hidden" name="action" value="change_password">
+    <label>Current master password<input type="password" name="current_password" required autocomplete="current-password"></label>
+    <label>Current authenticator code<input name="token" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" required autocomplete="one-time-code"></label>
+    <label>New master password<input type="password" name="new_password" minlength="12" required autocomplete="new-password"></label>
+    <label>Confirm new master password<input type="password" name="confirm_password" minlength="12" required autocomplete="new-password"></label>
+    <button type="submit">Change master password</button>
+  </form>
+
+  <div class="divider">ROTATE RECOVERY CODES</div>
+  <p class="muted tiny">This invalidates every previously issued recovery code and displays eight new codes once.</p>
+  <form method="post" class="stack">
+    <input type="hidden" name="action" value="regenerate_recovery">
+    <label>Current master password<input type="password" name="current_password" required autocomplete="current-password"></label>
+    <label>Current authenticator code<input name="token" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" required autocomplete="one-time-code"></label>
+    <button class="secondary" type="submit">Generate new recovery codes</button>
+  </form>
+  <p class="muted tiny" style="text-align:center;margin-top:18px"><a href="{{ url_for('index') }}">Back to dashboard</a></p>
+</section>
+{% endblock %}
