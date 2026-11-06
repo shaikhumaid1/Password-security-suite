@@ -6,7 +6,7 @@ PSS provides password generation, passphrase generation, offline password-streng
 
 ## Project status
 
-**Status:** Release preparation
+**Status:** Pre-release published (`v1.0.0-rc.1`)
 
 - Four automated tests passed in the developer's Windows environment.
 - Independent security review has not been completed.
@@ -110,4 +110,4 @@ The previous v1 account/MFA database is not automatically migrated into the new 
 
 ## License
 
-A license has not yet been selected. Until a LICENSE file is added, do not assume the repository grants permission to redistribute or reuse the code.
+This project is licensed under the [MIT License](LICENSE) (Copyright © 2026 umaid shaikh). You may use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the software, subject to the conditions in the license. The copyright and permission notices must be included in copies or substantial portions of the software.
