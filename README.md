@@ -1,54 +1,113 @@
-# Password Security Suite
+# Password Security Suite (PSS)
 
-**Local-first password toolkit + optional encrypted password vault.** Public source code; private user data. The application is designed to process credentials on the user's own computer and does not require a cloud account or remote password service.
+**A local-first password toolkit and encrypted password vault.**
 
-> Security status: v2 foundation committed. The integrated application has not yet completed its test and independent security-review phase. Do not store production credentials until those reviews are complete.
+PSS provides password generation, passphrase generation, offline password-strength analysis, and an optional encrypted local vault. It includes a command-line interface (CLI) and a local Flask GUI.
+
+## Project status
+
+**Status:** Release preparation
+
+- Four automated tests passed in the developer's Windows environment.
+- Independent security review has not been completed.
+- Do not treat this project as a professionally audited password manager or store production credentials until the required security reviews are complete.
 
 ## Features
-- Cryptographically secure password and passphrase generation using Python secrets.
-- Offline password-strength analysis using zxcvbn; analyzer input is not saved.
-- Optional local SQLite vault with AES-256-GCM authenticated encryption.
-- Argon2id key derivation and random vault data-encryption key.
+
+- Cryptographically secure password generation using Python `secrets`.
+- Passphrase generation.
+- Offline password-strength analysis using zxcvbn.
+- Local SQLite vault.
+- AES-256-GCM authenticated encryption.
+- Argon2id key derivation.
 - CLI and local Flask GUI.
-- No telemetry, cloud sync, remote database, or external password-checking API in core operation.
+- No cloud account, telemetry, remote database, or external password-checking API in core operation.
 
-## Windows installation
+## Requirements
 
-    git clone https://github.com/shaikhumaid1/Password-security-suite.git
-    cd Password-security-suite
-    py -m venv .venv
-    .venv\\Scripts\\Activate.ps1
-    python -m pip install -r requirements.txt
+- Windows 10/11 or a compatible Python environment.
+- Python 3.12 recommended.
+- pip.
 
-## Run GUI
+## Installation — Windows
 
-    python app.py
+```powershell
+git clone https://github.com/shaikhumaid1/Password-security-suite.git
+cd Password-security-suite
 
-Open http://127.0.0.1:5000. The server binds to loopback. Do not change it to 0.0.0.0 or expose it through port forwarding.
+py -m venv .venv
+.venv\Scripts\Activate.ps1
 
-## CLI
+python -m pip install -r requirements.txt
+```
 
-    python cli.py generate --length 24
-    python cli.py passphrase
-    python cli.py analyze
-    python cli.py vault-create
-    python cli.py vault-add
-    python cli.py vault-list
-    python cli.py vault-delete
+If PowerShell blocks virtual-environment activation, use the Python executable directly:
+
+```powershell
+.venv\Scripts\python.exe -m pip install -r requirements.txt
+.venv\Scripts\python.exe app.py
+```
+
+## Run the GUI
+
+```powershell
+python app.py
+```
+
+Open http://127.0.0.1:5000 in your browser.
+
+The application is intended for local use. Keep the server bound to loopback; do not change it to `0.0.0.0`, expose it through port forwarding, or make it reachable from an untrusted network.
+
+## CLI commands
+
+```powershell
+python cli.py generate --length 24
+python cli.py passphrase
+python cli.py analyze
+python cli.py vault-create
+python cli.py vault-add
+python cli.py vault-list
+python cli.py vault-delete
+```
 
 CLI password prompts use hidden input. Do not pass passwords as command-line arguments.
 
-## Data and privacy
-The vault database is stored under instance/vault.db and excluded from Git. Never upload the instance folder, database, backups, master passwords, recovery material, or encryption keys to a public repository. Public source code does not send user data to GitHub.
+## Data storage and privacy
 
-## Security design
-The vault uses a random data key, wrapped by an Argon2id-derived key-encryption key. Credential records are encrypted with AES-256-GCM using a fresh random nonce per encryption and record ID as authenticated associated data. SQLite contains encrypted record payloads. KDF parameters are stored with vault metadata.
+The vault database is stored locally under:
 
-## Important limitations
-This is not yet a professionally audited password manager. Local processing cannot protect against malware, keyloggers, compromised devices, malicious browser extensions, or an unattended unlocked vault. Python does not guarantee secure zeroization of all secrets in memory. Backups must be protected separately. Review docs/threat-model.md. Existing v1 account/MFA data in instance/password_suite.db is not migrated into the new vault; keep a backup before upgrading. The previous account/MFA routes are replaced by the v2 vault interface, so do not delete your old data until migration is designed and verified.
+`instance/vault.db`
 
-## Testing (run after implementation review)
+The `instance` directory is excluded from Git. Never publish vault databases, master passwords, encryption keys, recovery material, or private backups.
 
-    python -m pytest
+The repository is public source code; that does not mean local vault data is uploaded to GitHub. Protect local backups separately.
 
-A successful local test run is not a substitute for cryptographic review, dependency review, penetration testing, or independent audit.
+## Security architecture
+
+- Argon2id derives a key-encryption key from the master password.
+- A random data-encryption key protects vault entries.
+- AES-256-GCM provides authenticated encryption.
+- Each encryption operation uses a fresh random nonce.
+- SQLite stores encrypted credential payloads.
+
+See [docs/architecture.md](docs/architecture.md) and [docs/threat-model.md](docs/threat-model.md).
+
+## Testing
+
+Run the automated test suite:
+
+```powershell
+python -m pytest -v
+```
+
+The current local baseline is **4 passing tests** in the developer's Windows environment. This is a small test suite and does not establish overall application security.
+
+## Security limitations
+
+PSS has not undergone an independent professional security audit. Local processing cannot protect against malware, keyloggers, a compromised operating system, malicious browser extensions, physical access to an unlocked device, insecure backups, or memory inspection while the vault is unlocked. Python does not guarantee secure zeroization of all secrets in memory.
+
+The previous v1 account/MFA database is not automatically migrated into the new vault. Preserve existing data and backups until a migration process has been designed and verified. See [SECURITY.md](SECURITY.md) before reporting a vulnerability.
+
+## License
+
+A license has not yet been selected. Until a LICENSE file is added, do not assume the repository grants permission to redistribute or reuse the code.
