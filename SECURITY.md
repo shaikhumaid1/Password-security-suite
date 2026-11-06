@@ -2,7 +2,7 @@
 
 ## Project status
 
-Password Security Suite (PSS) is a local-first project undergoing release preparation. It has not received an independent professional security audit and must not be considered a production-certified password manager.
+Password Security Suite (PSS) is a local-first project with a published pre-release (`v1.0.0-rc.1`). It has not received an independent professional security audit and must not be considered a production-certified password manager.
 
 ## Reporting a vulnerability
 
