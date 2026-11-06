@@ -2,7 +2,20 @@
 
 Notable project changes are documented here.
 
-## Unreleased — release preparation
+## v1.0.0-rc.1 — 2026-11-06
+
+### Added
+- Published the first public release candidate.
+- Added the MIT License (`LICENSE`).
+- Added Windows installation and launch scripts.
+- Added release-readiness and security documentation.
+
+### Notes
+- This is a pre-release for evaluation, not a stable or security-audited release.
+- Four automated tests passed in the developer's Windows environment; broader testing remains required.
+- Use synthetic test credentials only.
+
+## Unreleased
 
 ### Added
 - Local password and passphrase generation.
