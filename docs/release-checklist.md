@@ -21,7 +21,7 @@ This checklist tracks the work required before publishing a stable release of Pa
 - [ ] Perform dependency vulnerability and license review; pin or lock release dependencies.
 - [ ] Perform independent cryptographic and application security review.
 - [ ] Verify backup and restore procedures, including recovery from a corrupted database.
-- [ ] Decide and add an explicit software license.
+- [x] Select and add the MIT License (`LICENSE`); confirm the README links to it.
 - [ ] Build and test a distributable package on a clean machine.
 - [ ] Review documentation, screenshots, and release notes for accuracy.
 
